@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord 招待リンク削除器</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* グローバル設定 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f7f8fa;
+      color: #333;
+      overflow-y: auto;
+      height: 100vh;
+      padding: 0;
+    }
+    /* ヘッダー */
+    h1 {
+      text-align: center;
+      font-size: 35px;
+      padding: 30px;
+      background-color: #4e73df;
+      color: white;
+      border-radius: 12px 12px 0 0;
+      margin-bottom: 30px;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    /* フォームとログのコンテナ */
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 0 20px;
+      margin-top: 20px;
+    }
+    /* フォーム */
+    form {
+      background-color: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 550px;
+      box-sizing: border-box;
+      position: relative;
+    }
+    label {
+      display: block;
+      font-size: 16px;
+      font-weight: 500;
+      color: #4e73df;
+      margin-bottom: 8px;
+    }
+    /* 入力フォーム */
+    input, select {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      resize: none;
+    }
+    input:focus, select:focus {
+      border-color: #4e73df;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(78, 115, 223, 0.3);
+      outline: none;
+    }
+    /* トークン非表示ボタン */
+    #toggleTokenButton {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #toggleTokenButton:hover {
+      background-color: #ddd;
+    }
+    /* ボタン */
+    button {
+      width: 100%;
+      padding: 15px;
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    button:hover {
+      background-color: #375a8c;
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    /* ログエリア */
+    .log {
+      width: 100%;
+      max-width: 550px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+      max-height: 550px;
+      box-sizing: border-box;
+    }
+    .log h3 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #333;
+      font-weight: 600;
+    }
+    .log ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .log ul li {
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.2s ease;
+    }
+    .log ul li:hover {
+      transform: scale(1.03);
+    }
+    .log ul li a {
+      color: #4e73df;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      word-wrap: break-word;
+      flex-grow: 1;
+    }
+    .log ul li a:hover {
+      text-decoration: underline;
+    }
+    /* 実行中のログ */
+    .process-log {
+      background-color: #f7f8fa;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 250px;
+      font-size: 16px;
+      color: #4e73df;
+      min-height: 350px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    .process-log h4 {
+      margin-top: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+    /* モバイルレスポンシブ */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 28px;
+        padding: 20px;
+      }
+      .container {
+        flex-direction: column;
+        gap: 30px;
+      }
+      form {
+        padding: 30px 25px;
+      }
+      button {
+        font-size: 16px;
+      }
+      .log h3 {
+        font-size: 20px;
+      }
+      .process-log {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Discord 招待リンク削除器</h1>
+
+  <div class="container">
+    <div class="process-log" id="processLog">
+      <h4>進行状況</h4>
+      <div>削除予定: <span id="pendingCount">0</span></div>
+      <div>削除済み: <span id="completedCount">0</span></div>
+    </div>
+
+    <form id="deleteForm">
+      <label for="tokens">Discordトークン:</label>
+      <input type="text" id="tokens" placeholder="Token1" />
+
+      <button type="button" id="toggleTokenButton">TOKENを隠す</button>
+
+      <label for="guildId">サーバーID:</label>
+      <input type="text" id="guildId" required placeholder="サーバーIDを入力">
+
+      <!-- 削除しない招待URLを入力する項目 -->
+      <label for="excludeUrls">削除しない招待URL (複数の場合はカンマ区切り):</label>
+      <input type="text" id="excludeUrls" placeholder="例: https://discord.gg/abc123, https://discord.gg/def456">
+
+      <button type="submit">サーバーの招待リンク削除</button>
+      <button type="button" id="stopButton" disabled>処理停止</button>
+    </form>
+  </div>
+
+  <script>
+    // トークン表示/非表示切り替え
+    document.getElementById("toggleTokenButton").addEventListener("click", function() {
+      const tokensInput = document.getElementById("tokens");
+      if (tokensInput.type === "text") {
+        tokensInput.type = "password";
+        this.textContent = "TOKENを表示";
+      } else {
+        tokensInput.type = "text";
+        this.textContent = "TOKENを隠す";
+      }
+    });
+
+    window.onload = function() {
+      if (localStorage.getItem('tokens')) {
+        document.getElementById('tokens').value = localStorage.getItem('tokens');
+      }
+      if (localStorage.getItem('guildId')) {
+        document.getElementById('guildId').value = localStorage.getItem('guildId');
+      }
+      if (localStorage.getItem('excludeUrls')) {
+        document.getElementById('excludeUrls').value = localStorage.getItem('excludeUrls');
+      }
+    };
+
+    document.getElementById("deleteForm").addEventListener("input", function(event) {
+      localStorage.setItem('tokens', document.getElementById('tokens').value);
+      localStorage.setItem('guildId', document.getElementById('guildId').value);
+      localStorage.setItem('excludeUrls', document.getElementById('excludeUrls').value);
+    });
+
+    let abortController;
+
+    document.getElementById("deleteForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const button = document.querySelector("button[type='submit']");
+      button.disabled = true;
+
+      const stopButton = document.getElementById("stopButton");
+      stopButton.disabled = false;
+
+      const processLog = document.getElementById("processLog");
+      const pendingCountElement = document.getElementById("pendingCount");
+      const completedCountElement = document.getElementById("completedCount");
+      pendingCountElement.textContent = "0";
+      completedCountElement.textContent = "0";
+
+      const token = document.getElementById("tokens").value;
+      const guildId = document.getElementById("guildId").value;
+      
+      // 入力された「削除しない招待URL」をカンマ区切りで配列化し、各値から「https://discord.gg/」部分を除去して招待コードだけにする
+      const excludeInput = document.getElementById("excludeUrls").value;
+      const excludeCodes = excludeInput 
+        ? excludeInput.split(",")
+            .map(item => item.trim())
+            .filter(item => item.length > 0)
+            .map(item => {
+              // URL形式の場合は「https://discord.gg/」または「discord.gg/」を除去
+              return item.replace(/^https?:\/\/(www\.)?discord\.gg\//i, '');
+            })
+        : [];
+
+      abortController = new AbortController();
+      const signal = abortController.signal;
+
+      async function getInvites(token, guildId) {
+        const url = `https://discord.com/api/v9/guilds/${guildId}/invites`;
+
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': token,
+              'Content-Type': 'application/json'
+            },
+            signal: signal
+          });
+
+          if (response.status === 429) {
+            const resetAfter = response.headers.get('X-RateLimit-Reset-After');
+            const waitTime = parseFloat(resetAfter) * 1000;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            return await getInvites(token, guildId);
+          }
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            const errorMessage = `Error ${errorData.code}: ${errorData.message}`;
+            throw new Error(errorMessage);
+          }
+
+          return await response.json();
+        } catch (error) {
+          processLog.innerHTML += `<div style="color: red;">${error.message}</div>`;
+          return [];
+        }
+      }
+
+      async function deleteInvite(token, inviteCode) {
+        const url = `https://discord.com/api/v9/invites/${inviteCode}`;
+
+        try {
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': token,
+              'Content-Type': 'application/json'
+            },
+            signal: signal
+          });
+
+          if (response.status === 429) {
+            const resetAfter = response.headers.get('X-RateLimit-Reset-After');
+            const waitTime = parseFloat(resetAfter) * 1000;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            return await deleteInvite(token, inviteCode);
+          }
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            const errorMessage = `Error ${errorData.code}: ${errorData.message}`;
+            throw new Error(errorMessage);
+          }
+
+          return true;
+        } catch (error) {
+          if (error.name === 'AbortError') {
+            if (!document.getElementById("processLog").innerHTML.includes("処理が中止されました。")) {
+              processLog.innerHTML += "<div>処理が中止されました。</div>";
+            }
+          } else {
+            processLog.innerHTML += `<div style="color: red;">${error.message}</div>`;
+          }
+          return false;
+        }
+      }
+
+      const invites = await getInvites(token, guildId);
+      if (invites.length === 0) {
+        processLog.innerHTML += "<div>招待リンクが見つかりませんでした。</div>";
+        button.disabled = false;
+        stopButton.disabled = true;
+        return;
+      }
+
+      // 削除予定数を設定
+      pendingCountElement.textContent = invites.length;
+
+      let deletedCount = 0;
+      for (const invite of invites) {
+        // ここで、invite.code と除外リストに含まれるコードを比較
+        if (!excludeCodes.includes(invite.code)) {
+          const result = await deleteInvite(token, invite.code);
+          if (result) {
+            deletedCount++;
+            completedCountElement.textContent = deletedCount; // 削除済み数を更新
+            pendingCountElement.textContent = invites.length - deletedCount; // 削除予定数を更新
+          }
+        } else {
+          processLog.innerHTML += `<div>削除しないリンク: ${invite.code}</div>`;
+        }
+      }
+
+      processLog.innerHTML += `<div>${deletedCount} 件の招待リンクが削除されました！</div>`;
+      completedCountElement.textContent = deletedCount;
+      pendingCountElement.textContent = "0";
+
+      button.disabled = false;
+      stopButton.disabled = true;
+    });
+
+    // 停止ボタンをクリックしたときに処理を中止
+    document.getElementById("stopButton").addEventListener("click", function() {
+      if (abortController) {
+        abortController.abort();
+      }
+    });
+  </script>
+</body>
+</html>
